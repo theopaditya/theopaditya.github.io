@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BULL & BEAR — Investment Simulator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8cc7a;
+    --red: #e03e3e;
+    --green: #2db87d;
+    --dark: #0a0a0c;
+    --dark2: #111116;
+    --dark3: #1a1a22;
+    --border: rgba(201,168,76,0.18);
+    --text: #e8e4d9;
+    --muted: #7a7568;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* SCREENS */
+  .screen { display: none; animation: fadeIn 0.6s ease; }
+  .screen.active { display: flex; flex-direction: column; min-height: 100vh; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== INTRO SCREEN ===== */
+  #intro {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .logo-ring {
+    width: 120px; height: 120px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 32px;
+    position: relative;
+    animation: spinRing 20s linear infinite;
+  }
+  .logo-ring::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 50%;
+  }
+  @keyframes spinRing { to { transform: rotate(360deg); } }
+  .logo-inner { font-size: 40px; animation: spinRing 20s linear infinite reverse; }
+
+  .show-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 12vw, 96px);
+    letter-spacing: 8px;
+    line-height: 0.9;
+    color: var(--gold);
+    text-shadow: 0 0 60px rgba(201,168,76,0.3);
+    margin-bottom: 4px;
+  }
+  .show-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(16px, 3vw, 22px);
+    color: var(--muted);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+  .show-tagline {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(201,168,76,0.5);
+    margin-bottom: 48px;
+  }
+
+  .intro-desc {
+    max-width: 480px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(232,228,217,0.7);
+    margin-bottom: 48px;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    padding: 16px 48px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    transition: all 0.2s;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: scale(1.03); }
+
+  /* ===== SETUP SCREEN ===== */
+  #setup { padding: 40px 20px; align-items: center; }
+  .setup-header { text-align: center; margin-bottom: 48px; }
+  .episode-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    margin-bottom: 16px;
+  }
+  .setup-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 6vw, 52px);
+    letter-spacing: 4px;
+    color: var(--text);
+  }
+  .setup-title span { color: var(--gold); }
+
+  .budget-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 10vw, 80px);
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .budget-label {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 32px;
+  }
+
+  .asset-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .asset-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,168,76,0.05) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .asset-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .asset-card:hover::before { opacity: 1; }
+  .asset-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+  .asset-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 22px; height: 22px;
+    background: var(--gold);
+    color: var(--dark);
+    font-size: 12px;
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+  }
+
+  .asset-icon { font-size: 28px; margin-bottom: 10px; }
+  .asset-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .asset-ticker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .asset-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .asset-risk {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid;
+  }
+  .risk-low { color: var(--green); border-color: rgba(45,184,125,0.3); }
+  .risk-med { color: var(--gold); border-color: rgba(201,168,76,0.3); }
+  .risk-high { color: var(--red); border-color: rgba(224,62,62,0.3); }
+
+  .alloc-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .alloc-label { font-size: 11px; color: var(--muted); flex: 1; }
+  .alloc-input {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    width: 80px;
+    padding: 4px 8px;
+    text-align: right;
+  }
+  .alloc-input:focus { outline: none; border-color: var(--gold); }
+
+  .remaining-bar {
+    width: 100%; max-width: 900px;
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .rem-label { font-size: 12px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; flex: 1; }
+  .rem-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    color: var(--green);
+    transition: color 0.3s;
+  }
+  .rem-amount.danger { color: var(--red); }
+
+  /* ===== GAME SCREEN ===== */
+  #game { padding: 0; }
+
+  .game-header {
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .gh-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--gold);
+  }
+  .gh-round {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .gh-portfolio {
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .gh-stat { text-align: right; }
+  .gh-stat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .gh-stat-lbl { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .neu { color: var(--text); }
+
+  .game-body { padding: 32px 24px; max-width: 960px; margin: 0 auto; width: 100%; }
+
+  /* STORY CARD */
+  .story-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    padding: 28px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .story-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .story-ep {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .story-headline {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(20px, 4vw, 28px);
+    line-height: 1.3;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .story-body {
+    font-size: 14px;
+    line-height: 1.9;
+    color: rgba(232,228,217,0.75);
+  }
+
+  /* MARKET EVENT BADGE */
+  .event-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .event-crash { background: rgba(224,62,62,0.1); border: 1px solid rgba(224,62,62,0.3); color: var(--red); }
+  .event-boom { background: rgba(45,184,125,0.1); border: 1px solid rgba(45,184,125,0.3); color: var(--green); }
+  .event-neutral { background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3); color: var(--gold); }
+
+  /* PORTFOLIO TABLE */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .port-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+  .port-table th {
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .port-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(201,168,76,0.06);
+    font-size: 14px;
+  }
+  .port-table tr:last-child td { border-bottom: none; }
+  .pt-name { font-weight: 500; }
+  .pt-ticker { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gold); }
+  .pt-mono { font-family: 'DM Mono', monospace; }
+  .pt-change {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* LESSON BOX */
+  .lesson-box {
+    background: rgba(201,168,76,0.04);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .lesson-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .lesson-body { font-size: 13px; line-height: 1.9; color: rgba(232,228,217,0.7); }
+
+  /* ACTION BAR */
+  .action-bar {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .btn-action {
+    flex: 1; min-width: 160px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .btn-action:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-action.primary { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+  .btn-action.primary:hover { background: var(--gold-light); }
+
+  /* CHOICE PANEL */
+  .choice-panel { display: none; }
+  .choice-panel.open { display: block; animation: fadeIn 0.3s ease; }
+  .choices-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .choice-btn {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    cursor: pointer;
+    color: var(--text);
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .choice-btn:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+  .choice-btn-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .choice-btn-sub { font-size: 11px; color: var(--muted); }
+
+  /* TICKER TAPE */
+  .ticker-wrap {
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 8px 0;
+    margin-bottom: 28px;
+  }
+  .ticker-inner {
+    display: flex; gap: 40px;
+    animation: ticker 25s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .tick-item { font-family: 'DM Mono', monospace; font-size: 12px; display: flex; gap: 8px; }
+  .tick-sym { color: var(--muted); }
+
+  /* END SCREEN */
+  #end {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .end-trophy { font-size: 80px; margin-bottom: 24px; animation: bounce 1s ease infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+  .end-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 72px);
+    letter-spacing: 6px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .end-sub { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 18px; color: var(--muted); margin-bottom: 40px; }
+  .final-stats { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
+  .fs-item { text-align: center; }
+  .fs-val { font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 2px; }
+  .fs-lbl { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .report-card {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    padding: 28px;
+    max-width: 600px;
+    text-align: left;
+    margin: 0 auto 40px;
+  }
+  .rc-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--gold); margin-bottom: 16px; }
+  .rc-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .rc-item:last-child { border-bottom: none; }
+  .rc-key { color: var(--muted); }
+
+  /* LOADING */
+  .ai-loading {
+    display: none;
+    align-items: center; gap: 10px;
+    padding: 20px;
+    font-size: 13px; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .ai-loading.show { display: flex; }
+  .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 1s ease-in-out infinite; }
+  .ai-dot:nth-child(2) { animation-delay: 0.2s; }
+  .ai-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+  /* UTILS */
+  .text-center { text-align: center; }
+  .mb-24 { margin-bottom: 24px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<!-- INTRO SCREEN -->
+<div id="intro" class="screen active">
+  <div class="bg-grid"></div>
+  <div class="logo-ring"><span class="logo-inner">₿</span></div>
+  <div class="show-title">BULL<br>&amp; BEAR</div>
+  <div class="show-sub">Investment Simulator</div>
+  <div class="show-tagline">Season 1 · Your Money. Your Choices. Your Consequences.</div>
+  <p class="intro-desc">
+    You've inherited <strong style="color:var(--gold)">■10,000</strong> from a mysterious uncle who was apparently a hedge fund manager. Now it's your turn.<br><br>
+    Navigate market crashes, scandals, booms, and black swan events. Every decision has a consequence. The market doesn't care about your feelings.
+  </p>
+  <button class="btn-primary" onclick="showScreen('setup')">BEGIN YOUR STORY</button>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setup" class="screen">
+  <div class="setup-header">
+    <div class="episode-tag">Episode 1 — The Inheritance</div>
+    <div class="setup-title">Build Your <span>Portfolio</span></div>
+    <p style="color:var(--muted); font-size:13px; margin-top:8px">Select assets and allocate your ■10,000. Choose wisely — or don't.</p>
+  </div>
+
+  <div class="budget-display">■10,000</div>
+  <div class="budget-label">Available Capital</div>
+
+  <div class="remaining-bar">
+    <span class="rem-label">Unallocated</span>
+    <span class="rem-amount" id="remaining">■10,000</span>
+  </div>
+
+  <div class="portfolio-grid" id="assetGrid"></div>
+
+  <div style="text-align:center">
+    <button class="btn-primary" onclick="startGame()" id="startBtn" style="opacity:0.4; pointer-events:none">
+      ENTER THE MARKET →
+    </button>
+    <p style="color:var(--muted); font-size:11px; margin-top:12px; letter-spacing:2px">ALLOCATE YOUR FULL ■10,000 TO BEGIN</p>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game" class="screen">
+  <div class="game-header">
+    <div>
+      <div class="gh-brand">BULL &amp; BEAR</div>
+      <div class="gh-round" id="roundLabel">SEASON 1 · EPISODE 1</div>
+    </div>
+    <div class="gh-portfolio">
+      <div class="gh-stat">
+        <div class="gh-stat-val neu" id="hdr-total">■10,000</div>
+        <div class="gh-stat-lbl">Portfolio</div>
+      </div>
+      <div class="gh-stat">
+        <div class="gh-stat-val" id="hdr-gain">■0</div>
+        <div class="gh-stat-lbl">Total P&amp;L</div>
+      </div>
+      <div class="gh-stat">
+        <div class="gh-stat-val" id="hdr-pct">0.00%</div>
+        <div class="gh-stat-lbl">Return</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker-wrap"><div class="ticker-inner" id="tickerInner"></div></div>
+
+  <div class="game-body">
+    <div id="storyContainer"></div>
+    <div class="ai-loading" id="loadingIndicator">
+      <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+      <span>Simulating market conditions...</span>
+    </div>
+    <div id="resultsContainer"></div>
+    <div id="lessonContainer"></div>
+    <div id="actionContainer"></div>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div id="end" class="screen">
+  <div class="end-trophy" id="endTrophy">🏆</div>
+  <div class="end-title" id="endTitle">SEASON FINALE</div>
+  <div class="end-sub" id="endSub">Your investment journey is complete</div>
+  <div class="final-stats" id="finalStats"></div>
+  <div class="report-card" id="reportCard"></div>
+  <button class="btn-primary" onclick="location.reload()">PLAY NEW SEASON</button>
+</div>
+
+<script>
+// ============================================================
+// ASSETS
+// ============================================================
+const ASSETS = [
+  {
+    id: 'snp', icon: '📈', name: 'S&P 500 INDEX', ticker: 'SPY',
+    desc: 'Tracks the 500 largest US companies. Safe, boring, proven.',
+    risk: 'low', riskLabel: 'LOW RISK',
+    baseReturn: 0.08, volatility: 0.15
+  },
+  {
+    id: 'btc', icon: '₿', name: 'BITCOIN', ticker: 'BTC',
+    desc: 'Digital gold or digital tulip? High reward, heart-attack volatility.',
+    risk: 'high', riskLabel: 'HIGH RISK',
+    baseReturn: 0.4, volatility: 0.8
+  },
+  {
+    id: 'tsla', icon: '⚡', name: 'TESLA MOTORS', ticker: 'TSLA',
+    desc: 'Electric cars, AI robots, and one unpredictable CEO.',
+    risk: 'high', riskLabel: 'HIGH RISK',
+    baseReturn: 0.25, volatility: 0.6
+  },
+  {
+    id: 'bond', icon: '🏛️', name: 'US TREASURY BONDS', ticker: 'TLT',
+    desc: 'Government-backed safety net. Small gains, but you sleep at night.',
+    risk: 'low', riskLabel: 'LOW RISK',
+    baseReturn: 0.04, volatility: 0.05
+  },
+  {
+    id: 'gold', icon: '🥇', name: 'GOLD ETF', ticker: 'GLD',
+    desc: 'The ancient hedge. Shines when everything else burns.',
+    risk: 'med', riskLabel: 'MEDIUM RISK',
+    baseReturn: 0.06, volatility: 0.18
+  },
+  {
+    id: 'startup', icon: '🚀', name: 'AI STARTUP FUND', ticker: 'SEED',
+    desc: 'Private fund backing 10 AI startups. Most will fail. One might 100x.',
+    risk: 'high', riskLabel: 'EXTREME RISK',
+    baseReturn: 0.6, volatility: 1.2
+  },
+  {
+    id: 'reit', icon: '🏢', name: 'REAL ESTATE REIT', ticker: 'VNQ',
+    desc: 'Own a slice of thousands of properties without the landlord headaches.',
+    risk: 'med', riskLabel: 'MEDIUM RISK',
+    baseReturn: 0.09, volatility: 0.22
+  },
+  {
+    id: 'eth', icon: '💎', name: 'ETHEREUM', ticker: 'ETH',
+    desc: 'The smart contract platform. More use cases than Bitcoin, more drama too.',
+    risk: 'high', riskLabel: 'HIGH RISK',
+    baseReturn: 0.35, volatility: 0.75
+  }
+];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let state = {
+  round: 0,
+  maxRounds: 5,
+  totalCapital: 10000,
+  portfolio: [], // {asset, amount, currentValue}
+  history: [],
+  totalPL: 0
+};
+
+let allocations = {};
+
+// ============================================================
+// SETUP
+// ============================================================
+function buildAssetGrid() {
+  const grid = document.getElementById('assetGrid');
+  ASSETS.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'asset-card';
+    card.id = 'card-' + a.id;
+    card.innerHTML = `
+      <div class="asset-icon">${a.icon}</div>
+      <div class="asset-name">${a.name}</div>
+      <div class="asset-ticker">${a.ticker}</div>
+      <div class="asset-desc">${a.desc}</div>
+      <span class="asset-risk risk-${a.risk}">${a.riskLabel}</span>
+      <div id="alloc-${a.id}" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(201,168,76,0.18);">
+        <label style="font-size:12px; color:#7a7568; display:block; margin-bottom:6px; letter-spacing:1px;">HOW MUCH? (max 10000)</label>
+        <input
+          id="input-${a.id}"
+          type="number"
+          min="0"
+          max="10000"
+          step="100"
+          value=""
+          placeholder="e.g. 2000"
+          onclick="event.stopPropagation()"
+          oninput="updateAllocation('${a.id}')"
+          style="width:100%; background:#1a1a22; border:1px solid rgba(201,168,76,0.4); color:#c9a84c; font-size:16px; padding:8px 12px; outline:none; font-family:monospace; box-sizing:border-box;"
+        >
+      </div>
+    `;
+    card.addEventListener('click', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+      toggleAsset(a.id, card);
+    });
+    grid.appendChild(card);
+  });
+}
+
+function toggleAsset(id, card) {
+  const allocRow = document.getElementById('alloc-' + id);
+  const isSelected = card.classList.contains('selected');
+  if (isSelected) {
+    card.classList.remove('selected');
+    allocRow.style.display = 'none';
+    allocations[id] = 0;
+    var inp = document.getElementById('input-' + id);
+    if (inp) inp.value = '';
+  } else {
+    card.classList.add('selected');
+    allocRow.style.display = 'block';
+    allocations[id] = 0;
+    setTimeout(function() {
+      var inp = document.getElementById('input-' + id);
+      if (inp) inp.focus();
+    }, 100);
+  }
+  updateRemaining();
+}
+
+function updateAllocation(id) {
+  const val = parseFloat(document.getElementById('input-' + id).value) || 0;
+  allocations[id] = val;
+  updateRemaining();
+}
+
+function updateRemaining() {
+  const total = Object.values(allocations).reduce((s, v) => s + v, 0);
+  const rem = 10000 - total;
+  const el = document.getElementById('remaining');
+  el.textContent = '■' + Math.round(rem).toLocaleString();
+  el.className = 'rem-amount' + (rem < 0 ? ' danger' : '');
+  const btn = document.getElementById('startBtn');
+  if (Math.abs(rem) < 1) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '0.4';
+    btn.style.pointerEvents = 'none';
+  }
+}
+
+function startGame() {
+  // Build portfolio from allocations
+  state.portfolio = [];
+  ASSETS.forEach(a => {
+    const amt = allocations[a.id] || 0;
+    if (amt > 0) {
+      state.portfolio.push({
+        asset: a,
+        invested: amt,
+        currentValue: amt,
+        history: []
+      });
+    }
+  });
+  showScreen('game');
+  runRound();
+}
+
+// ============================================================
+// TICKER
+// ============================================================
+function updateTicker() {
+  const items = state.portfolio.map(p => {
+    const change = ((p.currentValue - p.invested) / p.invested * 100).toFixed(1);
+    const sign = change >= 0 ? '+' : '';
+    return `<span class="tick-item"><span class="tick-sym">${p.asset.ticker}</span><span class="${change>=0?'pos':'neg'}">${sign}${change}%</span></span>`;
+  });
+  // Duplicate for infinite scroll
+  const combined = [...items, ...items].join('');
+  document.getElementById('tickerInner').innerHTML = combined;
+}
+
+// ============================================================
+// OFFLINE NARRATION — works without any API
+// ============================================================
+const NARRATIVES = {
+  fed_hike: [
+    "The Federal Reserve chairman steps to the podium and in three sentences rewrites the rules of the game. Half a percent. Markets convulse. Your phone buzzes with alerts you weren't ready for.",
+    "Washington speaks — Wall Street listens with a knot in its stomach. The rate hike lands like a thunderclap, sending growth assets into freefall while bonds quietly celebrate.",
+    "It was supposed to be a routine announcement. Nothing about today feels routine. The Fed just made your portfolio its test subject."
+  ],
+  ai_boom: [
+    "A video goes viral at 3am: a new AI solving problems no one thought solvable yet. By morning, NASDAQ futures are limit-up. The future arrived early — and it's repricing everything.",
+    "Tech euphoria is contagious. What started as a research paper became a trillion-dollar moment in 48 hours. The AI gold rush is on — and you're already holding a shovel.",
+    "Venture capitalists are sprinting. CEOs are rewriting roadmaps. And somewhere in your portfolio, a number just turned very, very green."
+  ],
+  crypto_scandal: [
+    "The tweet goes out at midnight: 'Withdrawals temporarily paused.' By dawn the word 'temporarily' has been quietly deleted. The exchange is gone. The money is gone. The trust is gone.",
+    "It started as a rumour on a Discord server. Within six hours it was confirmed: fraud. Crypto winter just got colder — and your digital assets are feeling the tremors.",
+    "Billions evaporated by sunrise. The crypto faithful are shaken — not by the technology, but by the humans who abused it."
+  ],
+  inflation: [
+    "The grocery receipt doesn't lie. Neither does the gas pump. Inflation is no longer a headline — it's your Tuesday. Every idle dollar just quietly shrank.",
+    "9% inflation. The number lands like a verdict. Cash-holders and bond investors exchange grim looks. Real assets are the only shelter still standing.",
+    "Prices rise. Wages lag. The investors who bet on hard assets are quietly smiling while everyone else checks their statements twice."
+  ],
+  market_crash: [
+    "Nobody rings a bell at the top. The sell-off started in Tokyo, crossed through London, and hit New York like a freight train. Red. Everywhere red.",
+    "A geopolitical headline. A margin call. A cascade. The kind of day that separates long-term investors from people who just thought they were long-term investors.",
+    "Warren Buffett once said be greedy when others are fearful. Right now, everyone is very, very fearful. The question is: what are you?"
+  ],
+  bull_run: [
+    "The data is perfect. Every metric points up. GDP strong, unemployment low, inflation cooling — the kind of conditions that make investors forget the word 'risk' exists.",
+    "FOMO is in the air like a fever. Every asset class is climbing. The market doesn't care about your hesitation — it's leaving without you.",
+    "This is what the good times feel like. Portfolios swelling, headlines jubilant, taxi drivers giving stock tips. Enjoy it — but keep one eye on the exit."
+  ],
+  startup_unicorn: [
+    "The email arrives at 6am: 'Acquisition confirmed at 4.2 billion.' One of your startups just got eaten by a tech giant. Your slice of that meal is about to change your life.",
+    "Ten bets. Nine will fail. One just hit. That's the brutal, beautiful math of venture capital — and today the math worked in your favour.",
+    "The founders pop champagne. The acquirer drops a press release. And somewhere in your portfolio, a seed investment just became a forest."
+  ]
+};
+
+function getOfflineNarrative(scenarioId) {
+  const opts = NARRATIVES[scenarioId] || ["The market moves. Your portfolio responds. Nothing is ever certain — that's the point."];
+  return opts[Math.floor(Math.random() * opts.length)];
+}
+
+async function getAIContent(prompt, scenarioId) {
+  return getOfflineNarrative(scenarioId);
+}
+
+// ============================================================
+// SCENARIOS
+// ============================================================
+const SCENARIOS = [
+  {
+    id: 'fed_hike', type: 'neutral', title: 'The Fed Makes Its Move',
+    summary: 'The Federal Reserve raises interest rates by 0.5% — the biggest hike in years. Bonds cheer. Growth stocks panic.',
+    effects: { snp: -0.08, btc: -0.18, tsla: -0.22, bond: 0.06, gold: 0.04, startup: -0.25, reit: -0.12, eth: -0.20 },
+    lesson: 'Rising interest rates hurt growth stocks and crypto because future earnings are worth less when discounted at higher rates. Bonds and gold often benefit as safe havens.'
+  },
+  {
+    id: 'ai_boom', type: 'boom', title: 'The AI Revolution Accelerates',
+    summary: 'A breakthrough AI model goes viral, triggering a massive tech rally. Venture capital floods into AI startups. Tesla surges on robotics excitement.',
+    effects: { snp: 0.15, btc: 0.12, tsla: 0.35, bond: -0.03, gold: -0.05, startup: 0.60, reit: 0.05, eth: 0.20 },
+    lesson: 'Tech booms can create enormous wealth fast — but the gains are rarely evenly distributed. Being in the right sector matters more than timing the market.'
+  },
+  {
+    id: 'crypto_scandal', type: 'crash', title: 'The Crypto Exchange Collapse',
+    summary: 'A major crypto exchange freezes withdrawals and files for bankruptcy. Investigations reveal missing customer funds. Panic selling hits all digital assets.',
+    effects: { snp: -0.05, btc: -0.42, tsla: -0.08, bond: 0.08, gold: 0.12, startup: -0.20, reit: -0.02, eth: -0.48 },
+    lesson: 'Counterparty risk is real. When institutions fail, even fundamentally sound assets collapse because of forced selling and panic. Diversification into uncorrelated assets can save you.'
+  },
+  {
+    id: 'inflation', type: 'neutral', title: 'Inflation Surprises Everyone',
+    summary: 'Consumer prices surge 9% year-over-year. Your cash loses purchasing power. Real assets become king.',
+    effects: { snp: 0.04, btc: 0.08, tsla: 0.06, bond: -0.15, gold: 0.22, startup: -0.05, reit: 0.18, eth: 0.07 },
+    lesson: 'Inflation destroys fixed-income returns. Gold and real estate act as inflation hedges because their values tend to rise with prices. Cash held in bonds is devastated.'
+  },
+  {
+    id: 'market_crash', type: 'crash', title: 'The Black Swan Has Landed',
+    summary: 'A geopolitical crisis triggers a global market sell-off. The S&P 500 drops 20% in a week. Panic is everywhere. Warren Buffett is buying.',
+    effects: { snp: -0.22, btc: -0.35, tsla: -0.30, bond: 0.15, gold: 0.18, startup: -0.45, reit: -0.20, eth: -0.38 },
+    lesson: 'Market crashes are when fortunes are made — but only by those who don\'t sell. Panic selling locks in losses. Holding through corrections has historically always been rewarded over long time horizons.'
+  },
+  {
+    id: 'bull_run', type: 'boom', title: 'Everything Is Going Up',
+    summary: 'Strong GDP data, low unemployment, cooling inflation — the economy is firing on all cylinders. Risk appetite is extreme. FOMO is rampant.',
+    effects: { snp: 0.20, btc: 0.45, tsla: 0.38, bond: -0.02, gold: 0.05, startup: 0.70, reit: 0.15, eth: 0.50 },
+    lesson: 'Bull markets reward the brave — and punish those sitting on the sidelines waiting for "the right moment." Time in the market beats timing the market.'
+  },
+  {
+    id: 'startup_unicorn', type: 'boom', title: 'Your Startup Fund Hits a Unicorn',
+    summary: 'One of the AI startups in your portfolio gets acquired by a tech giant at a 20x valuation. The fund returns are extraordinary.',
+    effects: { snp: 0.08, btc: 0.05, tsla: 0.10, bond: 0.02, gold: 0.01, startup: 1.50, reit: 0.06, eth: 0.08 },
+    lesson: 'Venture investing is about outliers. The power law means one massive winner can return the entire fund. This is why VCs diversify across many startups.'
+  }
+];
+
+let usedScenarios = [];
+let currentScenario = null;
+
+function pickScenario() {
+  const available = SCENARIOS.filter(s => !usedScenarios.includes(s.id));
+  if (available.length === 0) { usedScenarios = []; return SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)]; }
+  const s = available[Math.floor(Math.random() * available.length)];
+  usedScenarios.push(s.id);
+  return s;
+}
+
+// ============================================================
+// ROUND ENGINE
+// ============================================================
+async function runRound() {
+  state.round++;
+  currentScenario = pickScenario();
+
+  updateHeader();
+  updateTicker();
+
+  // Clear containers
+  document.getElementById('storyContainer').innerHTML = '';
+  document.getElementById('resultsContainer').innerHTML = '';
+  document.getElementById('lessonContainer').innerHTML = '';
+  document.getElementById('actionContainer').innerHTML = '';
+
+  // Episode header
+  const epNames = ['The Inheritance','The Storm','The Reckoning','The Pivot','The Final Call'];
+  document.getElementById('roundLabel').textContent =
+    `SEASON 1 · EPISODE ${state.round} — ${(epNames[state.round-1] || 'THE EPILOGUE').toUpperCase()}`;
+
+  // Show loading
+  const loading = document.getElementById('loadingIndicator');
+  loading.className = 'ai-loading show';
+
+  // Get AI narrative
+  const portfolioSummary = state.portfolio.map(p =>
+    `${p.asset.name} (${p.asset.ticker}): ■${Math.round(p.currentValue).toLocaleString()}`
+  ).join(', ');
+
+  const prompt = `You are the narrator of a Netflix-style investment drama called "Bull & Bear." 
+Round ${state.round} of 5. 
+Scenario: "${currentScenario.title}" — ${currentScenario.summary}
+Player's portfolio: ${portfolioSummary}
+Write a short, dramatic, 2-3 sentence narrative paragraph for this episode. 
+Make it feel like a TV drama with stakes and tension. Reference the scenario. Keep it punchy and vivid. No lists, just prose.`;
+
+  let narrative = '';
+  try {
+    narrative = await getAIContent(prompt, currentScenario.id);
+  } catch(e) {
+    narrative = currentScenario.summary;
+  }
+
+  loading.className = 'ai-loading';
+
+  // Render story
+  const type = currentScenario.type;
+  const badgeClass = type === 'boom' ? 'event-boom' : type === 'crash' ? 'event-crash' : 'event-neutral';
+  const badgeIcon = type === 'boom' ? '🟢' : type === 'crash' ? '🔴' : '🟡';
+  const badgeText = type === 'boom' ? 'MARKET BOOM' : type === 'crash' ? 'MARKET CRASH' : 'MARKET EVENT';
+
+  document.getElementById('storyContainer').innerHTML = `
+    <div class="story-card">
+      <div class="story-ep">SEASON 1 · EPISODE ${state.round}</div>
+      <div class="event-badge ${badgeClass}">${badgeIcon} ${badgeText}</div>
+      <div class="story-headline">${currentScenario.title}</div>
+      <div class="story-body">${narrative}</div>
+    </div>
+  `;
+
+  // Apply effects & build results
+  let totalBefore = state.portfolio.reduce((s, p) => s + p.currentValue, 0);
+  let roundPL = 0;
+  let tableRows = '';
+
+  state.portfolio.forEach(p => {
+    const effect = currentScenario.effects[p.asset.id] || 0;
+    const noise = (Math.random() - 0.5) * 0.1; // small random noise
+    const totalEffect = effect + noise;
+    const before = p.currentValue;
+    p.currentValue = Math.max(p.currentValue * (1 + totalEffect), 1);
+    const change = p.currentValue - before;
+    const changePct = (totalEffect * 100).toFixed(1);
+    const sign = change >= 0 ? '+' : '';
+    const cls = change >= 0 ? 'pos' : 'neg';
+    const arrow = change >= 0 ? '▲' : '▼';
+    roundPL += change;
+    tableRows += `
+      <tr>
+        <td><span class="pt-name">${p.asset.icon} ${p.asset.name}</span><br><span class="pt-ticker">${p.asset.ticker}</span></td>
+        <td class="pt-mono">■${Math.round(p.currentValue).toLocaleString()}</td>
+        <td><span class="pt-change ${cls}">${arrow} ${sign}■${Math.round(Math.abs(change)).toLocaleString()}</span></td>
+        <td><span class="pt-change ${cls}">${sign}${changePct}%</span></td>
+      </tr>
+    `;
+  });
+
+  let totalAfter = state.portfolio.reduce((s, p) => s + p.currentValue, 0);
+  state.totalPL = totalAfter - 10000;
+
+  const roundSign = roundPL >= 0 ? '+' : '';
+  const roundCls = roundPL >= 0 ? 'pos' : 'neg';
+  const totalCls = state.totalPL >= 0 ? 'pos' : 'neg';
+
+  document.getElementById('resultsContainer').innerHTML = `
+    <div class="section-title">PORTFOLIO UPDATE</div>
+    <table class="port-table">
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Value</th>
+          <th>This Round</th>
+          <th>Change %</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:28px">
+      <div style="flex:1; background:var(--dark2); border:1px solid var(--border); padding:16px 20px; text-align:center">
+        <div style="font-family:'DM Mono',monospace; font-size:22px" class="${roundCls}">${roundSign}■${Math.round(Math.abs(roundPL)).toLocaleString()}</div>
+        <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:4px">THIS EPISODE</div>
+      </div>
+      <div style="flex:1; background:var(--dark2); border:1px solid var(--border); padding:16px 20px; text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px" class="${totalCls}">■${Math.round(totalAfter).toLocaleString()}</div>
+        <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:4px">TOTAL PORTFOLIO</div>
+      </div>
+      <div style="flex:1; background:var(--dark2); border:1px solid var(--border); padding:16px 20px; text-align:center">
+        <div style="font-family:'DM Mono',monospace; font-size:22px" class="${totalCls}">${state.totalPL >= 0 ? '+' : ''}${((state.totalPL/10000)*100).toFixed(1)}%</div>
+        <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:4px">TOTAL RETURN</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('lessonContainer').innerHTML = `
+    <div class="lesson-box">
+      <div class="lesson-title">📚 WHAT JUST HAPPENED</div>
+      <div class="lesson-body">${currentScenario.lesson}</div>
+    </div>
+  `;
+
+  updateHeader();
+  updateTicker();
+
+  // Action bar
+  if (state.round >= state.maxRounds) {
+    document.getElementById('actionContainer').innerHTML = `
+      <div class="action-bar">
+        <button class="btn-action primary" onclick="showEnding()">⬛ SEASON FINALE →</button>
+      </div>
+    `;
+  } else {
+    document.getElementById('actionContainer').innerHTML = `
+      <div class="section-title">YOUR MOVE</div>
+      <div class="action-bar">
+        <button class="btn-action primary" onclick="runRound()">⏭ NEXT EPISODE</button>
+        <button class="btn-action" onclick="toggleRebalance()">⚖ REBALANCE PORTFOLIO</button>
+      </div>
+      <div class="choice-panel" id="rebalancePanel">
+        <div style="background:var(--dark2); border:1px solid var(--border); padding:20px; margin-bottom:20px">
+          <div class="lesson-title" style="margin-bottom:12px">🔄 REBALANCE</div>
+          <div class="lesson-body" style="margin-bottom:16px">Redistribute your current portfolio value of ■${Math.round(totalAfter).toLocaleString()} across your existing holdings. Enter new amounts below.</div>
+          <div id="rebalanceInputs"></div>
+          <button class="btn-action primary" style="margin-top:16px; width:100%" onclick="applyRebalance(${Math.round(totalAfter)})">APPLY REBALANCE</button>
+        </div>
+      </div>
+    `;
+    buildRebalanceInputs();
+  }
+
+  // Scroll to top of game body
+  document.querySelector('.game-body').scrollTop = 0;
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function buildRebalanceInputs() {
+  const container = document.getElementById('rebalanceInputs');
+  if (!container) return;
+  let html = '';
+  state.portfolio.forEach(p => {
+    html += `
+      <div class="alloc-row" style="margin:0; padding:10px 0; border-bottom:1px solid var(--border)">
+        <span class="alloc-label">${p.asset.icon} ${p.asset.name}</span>
+        <span style="font-size:11px; color:var(--muted); margin-right:8px">Current: ■${Math.round(p.currentValue).toLocaleString()}</span>
+        <input class="alloc-input" type="number" id="reb-${p.asset.id}" min="0" value="${Math.round(p.currentValue)}">
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function applyRebalance(total) {
+  let sum = 0;
+  state.portfolio.forEach(p => {
+    sum += parseFloat(document.getElementById('reb-' + p.asset.id)?.value || 0);
+  });
+  if (Math.abs(sum - total) > 10) {
+    alert(`Total must equal ■${total.toLocaleString()}. Current total: ■${Math.round(sum).toLocaleString()}`);
+    return;
+  }
+  state.portfolio.forEach(p => {
+    const val = parseFloat(document.getElementById('reb-' + p.asset.id)?.value || 0);
+    p.currentValue = val;
+  });
+  document.getElementById('rebalancePanel').classList.remove('open');
+  updateHeader();
+  updateTicker();
+  alert('Portfolio rebalanced! Your changes will take effect next episode.');
+}
+
+function toggleRebalance() {
+  const panel = document.getElementById('rebalancePanel');
+  panel.classList.toggle('open');
+  buildRebalanceInputs();
+}
+
+function updateHeader() {
+  const total = state.portfolio.reduce((s, p) => s + p.currentValue, 0);
+  const pl = total - 10000;
+  const pct = (pl / 10000 * 100).toFixed(2);
+  const cls = pl >= 0 ? 'pos' : 'neg';
+  document.getElementById('hdr-total').textContent = '■' + Math.round(total).toLocaleString();
+  document.getElementById('hdr-gain').textContent = (pl >= 0 ? '+' : '') + '■' + Math.round(Math.abs(pl)).toLocaleString();
+  document.getElementById('hdr-gain').className = 'gh-stat-val ' + cls;
+  document.getElementById('hdr-pct').textContent = (pl >= 0 ? '+' : '') + pct + '%';
+  document.getElementById('hdr-pct').className = 'gh-stat-val ' + cls;
+}
+
+// ============================================================
+// ENDING
+// ============================================================
+async function showEnding() {
+  const total = state.portfolio.reduce((s, p) => s + p.currentValue, 0);
+  const pl = total - 10000;
+  const pct = (pl / 10000 * 100).toFixed(1);
+  const won = pl >= 0;
+  const big = Math.abs(pct) > 30;
+
+  showScreen('end');
+
+  document.getElementById('endTrophy').textContent = won ? (big ? '👑' : '🏆') : (big ? '💀' : '😰');
+  document.getElementById('endTitle').textContent = won ? (big ? 'LEGENDARY INVESTOR' : 'SEASON COMPLETE') : (big ? 'WRECKED' : 'SEASON COMPLETE');
+  document.getElementById('endSub').textContent = won
+    ? `You turned ■10,000 into ■${Math.round(total).toLocaleString()}. The market bowed.`
+    : `Your ■10,000 is now ■${Math.round(total).toLocaleString()}. The market is humbling.`;
+
+  const plCls = won ? 'pos' : 'neg';
+  document.getElementById('finalStats').innerHTML = `
+    <div class="fs-item">
+      <div class="fs-val" style="color:var(--gold)">■${Math.round(total).toLocaleString()}</div>
+      <div class="fs-lbl">Final Value</div>
+    </div>
+    <div class="fs-item">
+      <div class="fs-val ${plCls}">${won?'+':''}■${Math.round(Math.abs(pl)).toLocaleString()}</div>
+      <div class="fs-lbl">Total P&L</div>
+    </div>
+    <div class="fs-item">
+      <div class="fs-val ${plCls}">${won?'+':''}${pct}%</div>
+      <div class="fs-lbl">Return</div>
+    </div>
+    <div class="fs-item">
+      <div class="fs-val" style="color:var(--text)">${state.maxRounds}</div>
+      <div class="fs-lbl">Episodes Survived</div>
+    </div>
+  `;
+
+  // Get AI verdict
+  const portfolioFinal = state.portfolio.map(p =>
+    `${p.asset.ticker}: invested ■${Math.round(p.invested)}, ended ■${Math.round(p.currentValue)}`
+  ).join('; ');
+
+  const verdictPrompt = `An investor completed a 5-round investment simulation. 
+Portfolio: ${portfolioFinal}
+Total return: ${pct}%
+Write a 3-sentence witty and insightful investor report card. Be honest about their choices, praise what worked, critique what didn't. End with one memorable piece of wisdom. Don't use bullet points.`;
+
+  const verdictOptions = [
+    'You showed instincts, but the market rewards patience over impulse. Study how your diversified holdings weathered the storms — that is the real lesson here.',
+    'Bold choices. Some paid off, some burned. The best investors are not those who avoid losses, but those who size their bets wisely enough to survive them.',
+    'The market does not care about your feelings — but it does reward preparation. Your winners reveal your instincts. Your losers reveal your blind spots. Both are tuition.',
+    'Every great investor has a season like this. The question is never how to avoid volatility — it is how to use it. You are learning. That already puts you ahead.'
+  ];
+  let verdict = verdictOptions[Math.floor(Math.random() * verdictOptions.length)];
+
+  const rcRows = state.portfolio.map(p => {
+    const ret = ((p.currentValue - p.invested) / p.invested * 100).toFixed(1);
+    const cls = ret >= 0 ? 'pos' : 'neg';
+    return `<div class="rc-item">
+      <span class="rc-key">${p.asset.icon} ${p.asset.name}</span>
+      <span class="${cls}">${ret >= 0 ? '+' : ''}${ret}%</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('reportCard').innerHTML = `
+    <div class="rc-title">📋 INVESTOR REPORT CARD</div>
+    ${rcRows}
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border); font-size:13px; line-height:1.8; color:rgba(232,228,217,0.7); font-style:italic">
+      "${verdict}"
+    </div>
+  `;
+}
+
+// ============================================================
+// SCREEN NAV
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// INIT
+buildAssetGrid();
+</script>
+</body>
+</html>
