@@ -1,497 +1,475 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aditya Prasad | TVA Terminal Portfolio</title>
-<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-:root {
---tva-orange: #ff8c42;
---tva-orange-glow: rgba(255, 140, 66, 0.6);
---tva-bg-dark: #0a0a0a;
---tva-grid-color: rgba(255, 140, 66, 0.15);
-}
-body, html {
-margin: 0;
-padding: 0;
-height: 100%;
-background-color: #2a2520;
-font-family: 'VT323', monospace;
-color: var(--tva-orange);
-overflow: hidden;
-display: flex;
-justify-content: center;
-align-items: center;
-}
-#monitor-casing {
-width: 95vw;
-height: 95vh;
-max-width: 1200px;
-background-color: var(--tva-bg-dark);
-border-radius: 10px;
-padding: 10px;
-box-shadow: 0 0 30px rgba(0,0,0,0.8) inset, 0 5px 15px rgba(0,0,0,0.5);
-position: relative;
-border: 4px solid #4a4036;
-}
-@media (min-width: 768px) {
-#monitor-casing {
-height: 90vh;
-border-radius: 20px;
-padding: 20px;
-box-shadow: 0 0 50px rgba(0,0,0,0.8) inset, 0 10px 30px rgba(0,0,0,0.5);
-border-width: 8px;
-}
-}
-#screen {
-width: 100%;
-height: 100%;
-border: 2px solid var(--tva-orange);
-border-radius: 5px;
-position: relative;
-overflow: hidden;
-box-shadow: 0 0 10px var(--tva-orange-glow), inset 0 0 20px var(--tva-orange-glow);
-background-image:
-linear-gradient(var(--tva-grid-color) 1px, transparent 1px),
-linear-gradient(90deg, var(--tva-grid-color) 1px, transparent 1px);
-background-size: 30px 30px;
-background-position: center center;
-}
-@media (min-width: 768px) {
-#screen {
-border-width: 4px;
-background-size: 40px 40px;
-}
-}
-.scanlines {
-position: absolute;
-top: 0; left: 0; width: 100%; height: 100%;
-background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
-background-size: 100% 4px;
-pointer-events: none;
-z-index: 50;
-}
-.crt-flicker {
-animation: flicker 0.15s infinite;
-pointer-events: none;
-position: absolute;
-top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(255, 140, 66, 0.02);
-z-index: 49;
-}
-@keyframes flicker {
-0% { opacity: 0.95; }
-50% { opacity: 1; }
-100% { opacity: 0.9; }
-}
-h1, h2, h3, p, span {
-text-shadow: 0 0 5px var(--tva-orange-glow);
-margin: 0;
-letter-spacing: 1px;
-}
-@media (min-width: 768px) {
-h1, h2, h3, p, span { letter-spacing: 2px; }
-}
-.text-glow {
-text-shadow: 0 0 8px var(--tva-orange);
-}
-.menu-item {
-cursor: pointer;
-padding: 5px 10px;
-transition: all 0.2s;
-display: block;
-width: fit-content;
-}
-.menu-item:hover, .menu-item.active {
-background-color: var(--tva-orange);
-color: var(--tva-bg-dark);
-text-shadow: none;
-box-shadow: 0 0 15px var(--tva-orange);
-}
-.view-container {
-position: absolute;
-top: 0; left: 0; width: 100%; height: 100%;
-padding: 15px;
-display: none;
-flex-direction: column;
-box-sizing: border-box;
-overflow-y: auto;
-overflow-x: hidden;
-}
-@media (min-width: 768px) {
-.view-container { padding: 40px; }
-}
-.view-container.active {
-display: flex;
-animation: turnOn 0.5s ease-out forwards;
-}
-@keyframes turnOn {
-0% { opacity: 0; transform: scale(0.98); filter: brightness(2); }
-100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-}
-.top-bar {
-display: flex;
-flex-direction: column;
-justify-content: space-between;
-border-bottom: 2px solid var(--tva-orange);
-padding-bottom: 5px;
-margin-bottom: 10px;
-font-size: 1rem;
-flex-shrink: 0;
-}
-@media (min-width: 640px) {
-.top-bar {
-flex-direction: row;
-padding-bottom: 10px;
-margin-bottom: 20px;
-font-size: 1.2rem;
-}
-}
-.icon-container {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-text-align: center;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-.icon-container:hover {
-transform: scale(1.05);
-text-shadow: 0 0 15px var(--tva-orange);
-}
-.icon-art {
-width: 60px;
-height: 60px;
-border: 2px solid var(--tva-orange);
-margin-bottom: 5px;
-display: flex;
-justify-content: center;
-align-items: center;
-position: relative;
-}
-@media (min-width: 768px) {
-.icon-art { width: 80px; height: 80px; margin-bottom: 10px; }
-}
-.icon-profile::before {
-content: ''; width: 30px; height: 30px; border: 2px solid var(--tva-orange); border-radius: 50%; position: absolute; top: 5px;
-}
-.icon-profile::after {
-content: ''; width: 45px; height: 20px; border: 2px solid var(--tva-orange); border-bottom: none; border-radius: 30px 30px 0 0; position: absolute; bottom: 0;
-}
-@media (min-width: 768px) {
-.icon-profile::before { width: 40px; height: 40px; top: 10px; }
-.icon-profile::after { width: 60px; height: 30px; }
-}
-.icon-folder::before {
-content: ''; width: 45px; height: 30px; border: 2px solid var(--tva-orange); position: absolute; bottom: 5px;
-}
-.icon-folder::after {
-content: ''; width: 15px; height: 8px; border: 2px solid var(--tva-orange); border-bottom: none; position: absolute; top: 13px; left: 5px;
-}
-@media (min-width: 768px) {
-.icon-folder::before { width: 60px; height: 40px; bottom: 10px; }
-.icon-folder::after { width: 25px; height: 10px; top: 18px; left: 8px; }
-}
-.icon-timeline { border: none; }
-.icon-timeline::before {
-content: ''; position: absolute; left: 10px; bottom: 5px; width: 2px; height: 45px; background: var(--tva-orange);
-}
-.icon-timeline::after {
-content: ''; position: absolute; left: 10px; bottom: 5px; width: 45px; height: 2px; background: var(--tva-orange);
-}
-.timeline-line {
-position: absolute; left: 12px; bottom: 20px; width: 35px; height: 2px; background: var(--tva-orange);
-}
-@media (min-width: 768px) {
-.icon-timeline::before { bottom: 10px; height: 60px; }
-.icon-timeline::after { bottom: 10px; width: 60px; }
-.timeline-line { bottom: 30px; width: 50px; }
-}
-.panel {
-border: 2px solid var(--tva-orange);
-padding: 15px;
-margin-bottom: 15px;
-background: rgba(0,0,0,0.5);
-}
-@media (min-width: 768px) {
-.panel { padding: 20px; margin-bottom: 20px; }
-}
-.btn-back {
-cursor: pointer;
-border: 2px solid var(--tva-orange);
-padding: 5px 10px;
-display: inline-block;
-margin-bottom: 15px;
-text-transform: uppercase;
-font-size: 1rem;
-width: fit-content;
-}
-@media (min-width: 768px) {
-.btn-back { padding: 5px 15px; font-size: 1.2rem; margin-bottom: 20px; }
-}
-.btn-back:hover {
-background: var(--tva-orange);
-color: var(--tva-bg-dark);
-}
-.status-dots {
-position: absolute;
-left: 5px;
-top: 10px;
-display: flex;
-flex-direction: row;
-gap: 5px;
-z-index: 10;
-}
-@media (min-width: 768px) {
-.status-dots {
-left: 20px;
-top: 50%;
-transform: translateY(-50%);
-flex-direction: column;
-gap: 15px;
-}
-}
-.dot {
-width: 8px; height: 8px;
-background-color: var(--tva-orange);
-border-radius: 50%;
-box-shadow: 0 0 10px var(--tva-orange);
-animation: pulse 2s infinite;
-}
-@media (min-width: 768px) {
-.dot { width: 12px; height: 12px; }
-}
-.dot:nth-child(2) { animation-delay: 0.5s; }
-.dot:nth-child(3) { animation-delay: 1s; }
-.dot:nth-child(4) { animation-delay: 1.5s; }
-@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-::-webkit-scrollbar { width: 4px; }
-@media (min-width: 768px) { ::-webkit-scrollbar { width: 8px; } }
-::-webkit-scrollbar-track { background: rgba(255, 140, 66, 0.1); }
-::-webkit-scrollbar-thumb { background: var(--tva-orange); }
-#timeline-canvas {
-width: 100%;
-height: 150px;
-border: 2px solid var(--tva-orange);
-margin-top: 10px;
-margin-bottom: 10px;
-background: rgba(0,0,0,0.3);
-flex-shrink: 0;
-}
-@media (min-width: 768px) {
-#timeline-canvas { height: 250px; margin-bottom: 20px; }
-}
-@keyframes floatMM { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.miss-minutes-icon {
-width: 120%; height: 120%;
-object-fit: cover;
-mix-blend-mode: screen;
-animation: floatMM 3s ease-in-out infinite;
-pointer-events: none;
-}
-@media (min-width: 768px) {
-.miss-minutes-icon { width: 140%; height: 140%; }
-}
-.chat-box {
-display: flex;
-flex-direction: column;
-height: 100%;
-border: 2px solid var(--tva-orange);
-background: rgba(0,0,0,0.4);
-padding: 10px;
-box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-min-height: 300px;
-}
-@media (min-width: 768px) { .chat-box { padding: 20px; } }
-.chat-messages {
-flex-grow: 1; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;
-}
-@media (min-width: 768px) { .chat-messages { gap: 15px; margin-bottom: 20px; padding-right: 10px; } }
-.chat-msg {
-padding: 8px 12px; border-radius: 4px; max-width: 90%; font-size: 1.2rem; line-height: 1.2; word-wrap: break-word;
-}
-@media (min-width: 768px) { .chat-msg { padding: 12px 18px; max-width: 85%; font-size: 1.5rem; } }
-.msg-mm { background: rgba(255, 140, 66, 0.15); align-self: flex-start; border-left: 4px solid var(--tva-orange); color: var(--tva-orange); }
-.msg-user { background: rgba(255, 255, 255, 0.1); align-self: flex-end; border-right: 4px solid #fff; color: #fff; }
-.chat-input-container { display: flex; gap: 10px; height: 40px; flex-shrink: 0; }
-@media (min-width: 768px) { .chat-input-container { gap: 15px; height: 50px; } }
-.chat-input {
-flex-grow: 1; background: rgba(0,0,0,0.6); border: 2px solid var(--tva-orange); color: var(--tva-orange); padding: 0 10px; font-family: 'VT323', monospace; font-size: 1.2rem; outline: none; transition: all 0.3s;
-}
-@media (min-width: 768px) { .chat-input { font-size: 1.8rem; padding: 0 15px; } }
-.chat-input:focus { box-shadow: 0 0 10px var(--tva-orange-glow); background: rgba(255,140,66,0.05); }
-.chat-btn {
-background: var(--tva-orange); color: var(--tva-bg-dark); border: 2px solid var(--tva-orange); padding: 0 15px; font-family: 'VT323', monospace; font-size: 1.2rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s;
-}
-@media (min-width: 768px) { .chat-btn { font-size: 1.8rem; padding: 0 25px; } }
-.chat-btn:hover { background: var(--tva-bg-dark); color: var(--tva-orange); box-shadow: 0 0 15px var(--tva-orange); }
-.typing-indicator { font-size: 1rem; opacity: 0.7; animation: pulse 1.5s infinite; }
-@media (min-width: 768px) { .typing-indicator { font-size: 1.2rem; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TVA Terminal Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --tva-orange: #ff8c42;
+            --tva-orange-glow: rgba(255, 140, 66, 0.6);
+            --tva-bg-dark: #0a0a0a;
+            --tva-grid-color: rgba(255, 140, 66, 0.15);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #2a2520;
+            font-family: 'VT323', monospace;
+            color: var(--tva-orange);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Responsive Monitor Casing */
+        #monitor-casing {
+            width: 95vw;
+            height: 95vh;
+            max-width: 1200px;
+            background-color: var(--tva-bg-dark);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8) inset, 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            border: 4px solid #4a4036;
+        }
+
+        @media (min-width: 768px) {
+            #monitor-casing {
+                height: 90vh;
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 0 50px rgba(0,0,0,0.8) inset, 0 10px 30px rgba(0,0,0,0.5);
+                border-width: 8px;
+            }
+        }
+
+        #screen {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--tva-orange);
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px var(--tva-orange-glow), inset 0 0 20px var(--tva-orange-glow);
+            background-image: 
+                linear-gradient(var(--tva-grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--tva-grid-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: center center;
+        }
+
+        @media (min-width: 768px) {
+            #screen {
+                border-width: 4px;
+                background-size: 40px 40px;
+            }
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+            pointer-events: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 140, 66, 0.02);
+            z-index: 49;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        h1, h2, h3, p, span {
+            text-shadow: 0 0 5px var(--tva-orange-glow);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        @media (min-width: 768px) {
+            h1, h2, h3, p, span { letter-spacing: 2px; }
+        }
+
+        .text-glow {
+            text-shadow: 0 0 8px var(--tva-orange);
+        }
+
+        .menu-item {
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: all 0.2s;
+            display: block;
+            width: fit-content;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--tva-orange);
+            color: var(--tva-bg-dark);
+            text-shadow: none;
+            box-shadow: 0 0 15px var(--tva-orange);
+        }
+
+        /* Responsive View Containers */
+        .view-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 15px;
+            display: none;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-y: auto; /* Universal scroll for mobile */
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .view-container { padding: 40px; }
+        }
+
+        .view-container.active {
+            display: flex;
+            animation: turnOn 0.5s ease-out forwards;
+        }
+
+        @keyframes turnOn {
+            0% { opacity: 0; transform: scale(0.98); filter: brightness(2); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        }
+
+        .top-bar {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--tva-orange);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 640px) {
+            .top-bar {
+                flex-direction: row;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Simple CSS Icons - Scaled down for mobile */
+        .icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .icon-container:hover {
+            transform: scale(1.05);
+            text-shadow: 0 0 15px var(--tva-orange);
+        }
+
+        .icon-art {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--tva-orange);
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        @media (min-width: 768px) {
+            .icon-art { width: 80px; height: 80px; margin-bottom: 10px; }
+        }
+
+        .icon-profile::before {
+            content: ''; width: 30px; height: 30px; border: 2px solid var(--tva-orange); border-radius: 50%; position: absolute; top: 5px;
+        }
+        .icon-profile::after {
+            content: ''; width: 45px; height: 20px; border: 2px solid var(--tva-orange); border-bottom: none; border-radius: 30px 30px 0 0; position: absolute; bottom: 0;
+        }
+        @media (min-width: 768px) {
+            .icon-profile::before { width: 40px; height: 40px; top: 10px; }
+            .icon-profile::after { width: 60px; height: 30px; }
+        }
+
+        .icon-folder::before {
+            content: ''; width: 45px; height: 30px; border: 2px solid var(--tva-orange); position: absolute; bottom: 5px;
+        }
+        .icon-folder::after {
+            content: ''; width: 15px; height: 8px; border: 2px solid var(--tva-orange); border-bottom: none; position: absolute; top: 13px; left: 5px;
+        }
+        @media (min-width: 768px) {
+            .icon-folder::before { width: 60px; height: 40px; bottom: 10px; }
+            .icon-folder::after { width: 25px; height: 10px; top: 18px; left: 8px; }
+        }
+
+        .icon-timeline { border: none; }
+        .icon-timeline::before {
+            content: ''; position: absolute; left: 10px; bottom: 5px; width: 2px; height: 45px; background: var(--tva-orange);
+        }
+        .icon-timeline::after {
+            content: ''; position: absolute; left: 10px; bottom: 5px; width: 45px; height: 2px; background: var(--tva-orange);
+        }
+        .timeline-line {
+            position: absolute; left: 12px; bottom: 20px; width: 35px; height: 2px; background: var(--tva-orange);
+        }
+        @media (min-width: 768px) {
+            .icon-timeline::before { bottom: 10px; height: 60px; }
+            .icon-timeline::after { bottom: 10px; width: 60px; }
+            .timeline-line { bottom: 30px; width: 50px; }
+        }
+
+        .panel {
+            border: 2px solid var(--tva-orange);
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.5);
+        }
+        @media (min-width: 768px) {
+            .panel { padding: 20px; margin-bottom: 20px; }
+        }
+        
+        .btn-back {
+            cursor: pointer;
+            border: 2px solid var(--tva-orange);
+            padding: 5px 10px;
+            display: inline-block;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            width: fit-content;
+        }
+        @media (min-width: 768px) {
+            .btn-back { padding: 5px 15px; font-size: 1.2rem; margin-bottom: 20px; }
+        }
+        .btn-back:hover {
+            background: var(--tva-orange);
+            color: var(--tva-bg-dark);
+        }
+
+        .status-dots {
+            position: absolute;
+            left: 5px;
+            top: 10px;
+            display: flex;
+            flex-direction: row;
+            gap: 5px;
+            z-index: 10;
+        }
+        @media (min-width: 768px) {
+            .status-dots {
+                left: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+        
+        .dot {
+            width: 8px; height: 8px;
+            background-color: var(--tva-orange);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--tva-orange);
+            animation: pulse 2s infinite;
+        }
+        @media (min-width: 768px) {
+            .dot { width: 12px; height: 12px; }
+        }
+        .dot:nth-child(2) { animation-delay: 0.5s; }
+        .dot:nth-child(3) { animation-delay: 1s; }
+        .dot:nth-child(4) { animation-delay: 1.5s; }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        .miss-minutes-img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            filter: invert(1) sepia(1) saturate(1000%) hue-rotate(330deg) brightness(1.2) contrast(1.5);
+            mix-blend-mode: screen;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 4px; }
+        @media (min-width: 768px) { ::-webkit-scrollbar { width: 8px; } }
+        ::-webkit-scrollbar-track { background: rgba(255, 140, 66, 0.1); }
+        ::-webkit-scrollbar-thumb { background: var(--tva-orange); }
+
+        #timeline-canvas {
+            width: 100%;
+            height: 150px;
+            border: 2px solid var(--tva-orange);
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+            #timeline-canvas { height: 250px; margin-bottom: 20px; }
+        }
+
+        @keyframes floatMM { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .miss-minutes-icon {
+            width: 120%; height: 120%;
+            object-fit: cover;
+            mix-blend-mode: screen; 
+            animation: floatMM 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @media (min-width: 768px) {
+            .miss-minutes-icon { width: 140%; height: 140%; }
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 2px solid var(--tva-orange);
+            background: rgba(0,0,0,0.4);
+            padding: 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            min-height: 300px;
+        }
+        @media (min-width: 768px) { .chat-box { padding: 20px; } }
+        
+        .chat-messages {
+            flex-grow: 1; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;
+        }
+        @media (min-width: 768px) { .chat-messages { gap: 15px; margin-bottom: 20px; padding-right: 10px; } }
+
+        .chat-msg {
+            padding: 8px 12px; border-radius: 4px; max-width: 90%; font-size: 1.2rem; line-height: 1.2; word-wrap: break-word;
+        }
+        @media (min-width: 768px) { .chat-msg { padding: 12px 18px; max-width: 85%; font-size: 1.5rem; } }
+        
+        .msg-mm { background: rgba(255, 140, 66, 0.15); align-self: flex-start; border-left: 4px solid var(--tva-orange); color: var(--tva-orange); }
+        .msg-user { background: rgba(255, 255, 255, 0.1); align-self: flex-end; border-right: 4px solid #fff; color: #fff; }
+
+        .chat-input-container { display: flex; gap: 10px; height: 40px; flex-shrink: 0; }
+        @media (min-width: 768px) { .chat-input-container { gap: 15px; height: 50px; } }
+        
+        .chat-input {
+            flex-grow: 1; background: rgba(0,0,0,0.6); border: 2px solid var(--tva-orange); color: var(--tva-orange); padding: 0 10px; font-family: 'VT323', monospace; font-size: 1.2rem; outline: none; transition: all 0.3s;
+        }
+        @media (min-width: 768px) { .chat-input { font-size: 1.8rem; padding: 0 15px; } }
+        .chat-input:focus { box-shadow: 0 0 10px var(--tva-orange-glow); background: rgba(255,140,66,0.05); }
+        
+        .chat-btn {
+            background: var(--tva-orange); color: var(--tva-bg-dark); border: 2px solid var(--tva-orange); padding: 0 15px; font-family: 'VT323', monospace; font-size: 1.2rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s;
+        }
+        @media (min-width: 768px) { .chat-btn { font-size: 1.8rem; padding: 0 25px; } }
+        .chat-btn:hover { background: var(--tva-bg-dark); color: var(--tva-orange); box-shadow: 0 0 15px var(--tva-orange); }
+        
+        .typing-indicator { font-size: 1rem; opacity: 0.7; animation: pulse 1.5s infinite; }
+        @media (min-width: 768px) { .typing-indicator { font-size: 1.2rem; } }
+    </style>
 </head>
 <body>
-<div id="monitor-casing">
-<div id="screen">
-<div class="scanlines"></div>
-<div class="crt-flicker"></div>
-<div id="view-home" class="view-container active">
-<div class="status-dots">
-<div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-</div>
-<div class="flex flex-col md:flex-row h-full w-full">
-<div class="w-full md:w-1/2 grid grid-cols-2 gap-4 md:gap-8 p-4 md:pl-12 md:p-8 items-center mt-6 md:mt-0">
-<div class="icon-container" onclick="navigate('view-about')">
-<div class="icon-art icon-profile"></div>
-<h3 class="text-xl md:text-2xl">IDENTITY</h3>
-</div>
-<div class="icon-container" onclick="navigate('view-projects')">
-<div class="icon-art icon-folder"></div>
-<h3 class="text-xl md:text-2xl">DOSSIER</h3>
-</div>
-<div class="icon-container" onclick="navigate('view-timeline')">
-<div class="icon-art icon-timeline">
-<div class="timeline-line"></div>
-<span style="position: absolute; top:5px; left:15px; font-size: 0.7rem;" class="md:top-[10px] md:left-[20px] md:text-[0.8rem]">3.08</span>
-</div>
-<h3 class="text-xl md:text-2xl">TIMELINE</h3>
-</div>
-<div class="icon-container" onclick="navigate('view-ai')" style="cursor: pointer;">
-<div class="w-[70px] h-[70px] md:w-[90px] md:h-[90px] mb-[5px] md:mb-[10px] flex justify-center items-center relative">
-<img src="watermarked_img_12174987426648841498.jpg" alt="Miss Minutes" class="miss-minutes-icon" onerror="this.outerHTML='<div class=\'text-[#ff8c42]\'>[AI]</div>'">
-</div>
-<h3 class="text-xl md:text-2xl">AI ASSIST</h3>
-</div>
-</div>
-<div class="w-full md:w-1/2 flex flex-col justify-center border-t-2 md:border-t-0 md:border-l-2 border-dashed border-[#ff8c42] opacity-80 pt-6 md:pt-0 md:pl-10 mt-4 md:mt-0 pb-10 md:pb-0">
-<h1 class="text-3xl md:text-5xl mb-1 md:mb-2 text-glow">ACTION LIST///</h1>
-<h2 class="text-2xl md:text-4xl mb-4 md:mb-8">SELECT PROGRAM</h2>
-<div class="flex flex-col gap-2 md:gap-4 text-xl md:text-3xl">
-<div class="menu-item" onclick="navigate('view-about')">1. IDENTITY (ABOUT)</div>
-<div class="menu-item" onclick="navigate('view-projects')">2. DOSSIER (PROJECTS)</div>
-<div class="menu-item" onclick="navigate('view-timeline')">3. TIMELINE (RESUME)</div>
-<div class="menu-item" onclick="navigate('view-ai')">4. AI ASSIST (CHAT)</div>
-</div>
-</div>
-</div>
-<div class="absolute bottom-2 left-2 md:bottom-4 md:left-4 text-sm md:text-xl hidden sm:block">04.52.3021</div>
-<div class="absolute bottom-2 right-2 md:bottom-4 md:right-4 text-sm md:text-xl">0231.47 // 387741</div>
-</div>
-<div id="view-about" class="view-container">
-<div class="top-bar">
-<span>SUBJECT: IDENTITY PROFILE</span>
-<span>STATUS: ACTIVE</span>
-</div>
-<div class="btn-back" onclick="navigate('view-home')">< RETURN TO MAIN</div>
-<div class="flex flex-col md:flex-row gap-6 md:gap-8 flex-grow">
-<div class="w-full md:w-1/3 flex flex-col items-center flex-shrink-0">
-<div class="w-2/3 md:w-full max-w-[250px] md:max-w-none aspect-square border-4 border-[#ff8c42] mb-4 relative overflow-hidden flex justify-center items-center">
-<img src="ADITYAPFP.png" 
-onerror="this.onerror=null; this.src='https://placehold.co/400x400/0a0a0a/ffffff?text=ADITYA+PRASAD';" 
-class="w-full h-full object-cover z-0" 
-style="filter: grayscale(100%) sepia(100%) hue-rotate(350deg) saturate(500%) contrast(150%);"
-alt="Aditya Prasad">
-<div class="scanlines z-20"></div>
-</div>
-<h2 class="text-xl md:text-3xl bg-[#ff8c42] text-[#0a0a0a] px-2 md:px-4 w-full text-center">VARIANT: ADITYA-01</h2>
-</div>
-<div class="w-full md:w-2/3 panel mb-0">
-<h1 class="text-2xl md:text-4xl mb-2 md:mb-4 text-glow">WARNING! UNAUTHORIZED ACCESS</h1>
-<p class="text-lg md:text-2xl mb-4">Processing identity details...</p>
-<p class="text-base md:text-xl mb-4 leading-relaxed">
-> NAME: ADITYA PRASAD
 
-> ROLE: MBA FINANCE CANDIDATE
+    <div id="monitor-casing">
+        <div id="screen">
+            <div class="scanlines"></div>
+            <div class="crt-flicker"></div>
 
-> DESIGNATION: FINANCIAL ANALYST / MODELLER
+            <div id="view-home" class="view-container active">
+                <div class="status-dots">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row h-full w-full">
+                    <!-- Icon Grid Side -->
+                    <div class="w-full md:w-1/2 grid grid-cols-2 gap-4 md:gap-8 p-4 md:pl-12 md:p-8 items-center mt-6 md:mt-0">
+                        <div class="icon-container" onclick="navigate('view-about')">
+                            <div class="icon-art icon-profile"></div>
+                            <h3 class="text-xl md:text-2xl">IDENTITY</h3>
+                        </div>
+                        <div class="icon-container" onclick="navigate('view-projects')">
+                            <div class="icon-art icon-folder"></div>
+                            <h3 class="text-xl md:text-2xl">DOSSIER</h3>
+                        </div>
+                        <div class="icon-container" onclick="navigate('view-timeline')">
+                            <div class="icon-art icon-timeline">
+                                <div class="timeline-line"></div>
+                                <span style="position: absolute; top:5px; left:15px; font-size: 0.7rem;" class="md:top-[10px] md:left-[20px] md:text-[0.8rem]">3.08</span>
+                            </div>
+                            <h3 class="text-xl md:text-2xl">TIMELINE</h3>
+                        </div>
+                        <div class="icon-container" onclick="navigate('view-ai')" style="cursor: pointer;">
+                            <div class="w-[70px] h-[70px] md:w-[90px] md:h-[90px] mb-[5px] md:mb-[10px] flex justify-center items-center relative">
+                                <img src="watermarked_img_12174987426648841498.jpg" alt="Miss Minutes" class="miss-minutes-icon" onerror="this.outerHTML='<div class=\'text-[#ff8c42]\'>[AI]</div>'">
+                            </div>
+                            <h3 class="text-xl md:text-2xl">AI ASSIST</h3>
+                        </div>
+                    </div>
 
-> LOCATION: HOWRAH, WEST BENGAL
+                    <!-- List Menu Side -->
+                    <div class="w-full md:w-1/2 flex flex-col justify-center border-t-2 md:border-t-0 md:border-l-2 border-dashed border-[#ff8c42] opacity-80 pt-6 md:pt-0 md:pl-10 mt-4 md:mt-0 pb-10 md:pb-0">
+                        <h1 class="text-3xl md:text-5xl mb-1 md:mb-2 text-glow">ACTION LIST///</h1>
+                        <h2 class="text-2xl md:text-4xl mb-4 md:mb-8">SELECT PROGRAM</h2>
+                        
+                        <div class="flex flex-col gap-2 md:gap-4 text-xl md:text-3xl">
+                            <div class="menu-item" onclick="navigate('view-about')">1. IDENTITY (ABOUT)</div>
+                            <div class="menu-item" onclick="navigate('view-projects')">2. DOSSIER (PROJECTS)</div>
+                            <div class="menu-item" onclick="navigate('view-timeline')">3. TIMELINE (RESUME)</div>
+                            <div class="menu-item" onclick="navigate('view-ai')">4. AI ASSIST (CHAT)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-2 left-2 md:bottom-4 md:left-4 text-sm md:text-xl hidden sm:block">04.52.3021</div>
+                <div class="absolute bottom-2 right-2 md:bottom-4 md:right-4 text-sm md:text-xl">0231.47 // 387741</div>
+            </div>
 
+            <div id="view-about" class="view-container">
+                <div class="top-bar">
+                    <span>SUBJECT: IDENTITY PROFILE</span>
+                    <span>STATUS: ACTIVE</span>
+                </div>
+                
+                <div class="btn-back" onclick="navigate('view-home')">&lt; RETURN TO MAIN</div>
 
-
-> BACKGROUND CHECK:
-
-Analytical, results-oriented MBA Finance candidate with hands-on experience in financial modeling, valuation, and operational finance. Builds independent equity research and ratio analysis work alongside internship experience in business development and financial operations.
-
-
-
-> TECHNICAL SKILLS:
-
-MS Excel (Advanced), Power BI, Tally ERP, Financial Modeling, DCF Valuation, DuPont Analysis.
-</p>
-<div class="mt-6 border-t border-dashed border-[#ff8c42] pt-4">
-<h3 class="text-xl md:text-2xl mb-2">KNOWN ALIASES</h3>
-<a href="mailto:adityaprasad646@gmail.com" class="block text-base md:text-xl hover:bg-[#ff8c42] hover:text-black w-fit px-1">> EMAIL: adityaprasad646@gmail.com</a>
-<a href="https://www.linkedin.com/in/aditya-prasad270308" target="_blank" class="block text-base md:text-xl hover:bg-[#ff8c42] hover:text-black w-fit px-1">> LINKEDIN: aditya-prasad270308</a>
-<p class="block text-base md:text-xl w-fit px-1 mt-1">> COMM-LINK: +91 7044459740</p>
-</div>
-<div class="mt-6 border-t border-dashed border-[#ff8c42] pt-4 pb-8 md:pb-0">
-<h3 class="text-xl md:text-2xl mb-2">CREDENTIALS: SCANNABLE ID</h3>
-<p class="text-xs md:text-sm mb-4 opacity-80">> POINT CAMERA DEVICE AT RELIC TO VERIFY TIMELINE</p>
-<div class="relative w-48 md:w-64 h-auto border-2 border-[#ff8c42] rounded-lg overflow-hidden group">
-<img src="loki_tva_custom_id_back.jpg" alt="TVA Custom ID" class="w-full h-auto object-cover opacity-90" onerror="this.onerror=null; this.src='https://placehold.co/400x600/0a0a0a/ff8c42?text=TVA+ID+CARD';">
-<div class="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
-<div class="p-1 md:p-2 border-2 border-[#ff8c42] bg-[#0a0a0a]">
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://www.linkedin.com/in/aditya-prasad270308&color=ff8c42&bgcolor=0a0a0a&margin=0" alt="Scan" class="w-16 h-16 md:w-24 md:h-24">
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div id="view-projects" class="view-container">
-<div class="top-bar">
-<span>DOSSIER: INCIDENT REPORTS</span>
-<span>CLEARANCE: LEVEL 3</span>
-</div>
-<div class="btn-back" onclick="navigate('view-home')">< RETURN TO MAIN</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 flex-grow pb-10">
-<div class="panel cursor-pointer hover:bg-[#ff8c42] hover:text-[#0a0a0a] transition-colors group mb-0" onclick="window.open('https://lnkd.in/p/d2HaKu-d', '_blank')">
-<h2 class="text-xl md:text-2xl mb-1 md:mb-2 group-hover:text-[#0a0a0a] font-bold">FILE: HUL EQUITY RESEARCH ↗</h2>
-<p class="text-sm md:text-lg mb-2 opacity-80 group-hover:text-[#0a0a0a]">TIMELINE SEGMENT: INDEPENDENT</p>
-<p class="text-base md:text-xl group-hover:text-[#0a0a0a]">Sell-side style equity research report covering FMCG industry outlook. Analysed 5-year financials and benchmarked HUL against peers on P/E, EV/EBITDA.</p>
-<div class="mt-2 md:mt-4 text-xs md:text-sm font-bold">TOOLS: [EXCEL] [VALUATION] [RATIO ANALYSIS]</div>
-</div>
-<div class="panel cursor-pointer hover:bg-[#ff8c42] hover:text-[#0a0a0a] transition-colors group mb-0">
-<h2 class="text-xl md:text-2xl mb-1 md:mb-2 group-hover:text-black font-bold">FILE: TATA MOTORS MODEL</h2>
-<p class="text-sm md:text-lg mb-2 opacity-80 group-hover:text-black">TIMELINE SEGMENT: INDEPENDENT</p>
-<p class="text-base md:text-xl group-hover:text-black">Built a 10-year financial ratio model (FY13-FY22) tracking growth, margin, and leverage. Applied DuPont analysis to break down Return on Equity.</p>
-<div class="mt-2 md:mt-4 text-xs md:text-sm font-bold">TOOLS: [FINANCIAL MODELING] [DUPONT ANALYSIS]</div>
-</div>
-<div class="panel cursor-pointer hover:bg-[#ff8c42] hover:text-black transition-colors group mb-0">
-<h2 class="text-xl md:text-2xl mb-1 md:mb-2 group-hover:text-black font-bold">FILE: FINTRACK APP</h2>
-<p class="text-sm md:text-lg mb-2 opacity-80 group-hover:text-black">TIMELINE SEGMENT: INDEPENDENT</p>
-<p class="text-base md:text-xl group-hover:text-black">Personal finance web app to track assets, liabilities, and budgets. Features interactive dashboard with financial health scoring and net worth tracking.</p>
-<div class="mt-2 md:mt-4 text-xs md:text-sm font-bold">TECH: [REACT.JS] [RECHARTS] [WEB APP]</div>
-</div>
-<div class="panel cursor-pointer hover:bg-[#ff8c42] hover:text-black transition-colors group mb-0">
-<h2 class="text-xl md:text-2xl mb-1 md:mb-2 group-hover:text-black font-bold">FILE: PROCAM LOGISTICS OPS</h2>
-<p class="text-sm md:text-lg mb-2 opacity-80 group-hover:text-black">TIMELINE SEGMENT: 2026</p>
-<p class="text-base md:text-xl group-hover:text-black">Executed sales automation workflow via EXIM data analysis, generating 500+ leads. Mastered Tally ERP for MSME compliance with 100% accuracy.</p>
-<div class="mt-2 md:mt-4 text-xs md:text-sm font-bold">TOOLS: [TALLY ERP] [CLAY AI] [EXIM DATA]</div>
-</div>
-</div>
-</div>
-<div id="view-timeline" class="view-container">
-<div class="top-bar">
-<span>MONITORING: TEMPORAL AURA</span>
-<span>TIMELINE SEGMENT: A17.BOD</span>
-</div>
-<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 md:mb-6 gap-4">
-<div class="btn-back !mb-0" onclick="navigate('view-home')">< RETURN TO MAIN</div>
-<div class="flex flex-row gap-2 md:gap-4 w-full sm:w-auto">
-<a href="https://www.linkedin.com/in/aditya-prasad270308" target="_blank" class="flex-1 sm:flex-none border-2 border-[#ff8c42] px-2 md:px-4 py-1 hover:bg-[#ff8c42] hover:text-[#0a0a0a] transition-colors cursor-pointer text-center no-underline font-bold text-sm md:text-base">
-> LINKEDIN
-</a>
-<a href="https://drive.google.com/file/d/1fhmFM7qk5UQKpwKpgc35nXJgW3Gp1ijV/view?usp=sharing" target="_blank" class="flex-1 sm:flex-none border-2 border-[#ff8c42] px-2 md:px-4 py-1 hover:bg-[#ff8c42] hover:text-[#0a0a0a] transition-colors cursor-pointer text-center no-underline font-bold text-sm md:text-base">
-> RESUME.PDF
-</a>
-</div>
-</div>
-<h1 class="text-2xl md:text-4xl text-glow mb-1 md:mb-2">WARNING! NEXUS EVENT DETECTED</h1>
-<p class="text-base md:text-xl mb-2 md:mb-4">Tracking career trajectory branches...</p>
-<canvas id="timeline-canvas"></canvas>
-<div class="flex flex-col sm:flex-row justify-between items-start 
+                <div class="flex flex-col md:flex-row gap-6 md:gap-8 flex-grow">
+                    <!-- Photo Column -->
+                    <div class="w-full md:w-1/3 flex flex-col items-center flex-shrink-0">
+                        <div class="w-2/3 md:w-full max-w-[250px] md:max-w-none aspect-square border-4 border-[#ff8c42] mb-4 relative overflow-hidden flex justify-center items-center">
+                            <img src="ADITYAPFP.png" 
+                                 onerror="this.onerror=null; this.src='https://placehold.co/400x400/0a0a0a/ffffff?text=ADITYA+PRASAD';" 
+                                 class="w-full h-full object-cover z-0" 
+                                 style="filter: grayscale(100%) sepia(100%) hue-rotate(350deg) saturate(500%) contrast(150%);"
+                                 alt="Aditya Prasad">
+                            <div class="scanlines z-20"></div>
+                        </div>
+                        <h2 class="text-xl md:text-3xl bg-[#ff8c42] text-[#0a0a0a] px-2 md:px-4 w-full text-center">VARIANT: ADITYA-01</h2>
+                    </div>
+                    
+                    <!-- Details Column -->
+                    <div class="w-full md:w-2/3 panel mb-0">
+                        <h1 class="text-2xl md:text-4xl mb-2 md:mb-4 text-glow">WARNING! UNAUTHORIZED ACCESS</h1>
+                        <p class="text-lg md:text-2xl mb-4">Processing identity details...</p>
+                        <p class="text-base md:text-xl mb-4 leading-relaxed">
+                            > NAME: ADITYA PRASAD<br>
+                            > ROLE: MBA FINANCE CANDIDATE<br>
+                            > DESIGNATION: FINANCIAL ANALYST / MODELLER<br>
+                            > LOCATION: HOWRAH, WEST BENGAL<br>
+                            <br>
+                            > BACKGROUND CHECK:<br>
+                            Analytical, results-oriented MBA Finance candidate with hands-on experience in financial modeling, valuation, and operational finance. Builds independent equity re
